@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07152d"><title>KellerScan — Sysdiagnose Analyzer</title>
+<style>
+:root{--bg:#061226;--panel:#0b2342;--line:#285476;--cyan:#35e7ff;--blue:#4389ff;--text:#eaf6ff;--muted:#a1b9d2;--gold:#ffd184}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#10456b,#08142c 60%,#080b20);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}.wrap{max-width:980px;margin:auto;padding:22px 14px 45px}.hero{text-align:center;padding:18px 8px 25px}.brand{font-size:clamp(35px,9vw,58px);font-weight:850;letter-spacing:.04em;background:linear-gradient(90deg,#fff,#76efff,#aab4ff);color:transparent;background-clip:text;-webkit-background-clip:text}.sub{letter-spacing:.35em;color:#8defff;font-size:11px;margin-top:8px}.panel{border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#0b3154e8,#101a3ceF);margin:14px 0;overflow:hidden;box-shadow:0 18px 50px #0004}.head{padding:16px 18px;border-bottom:1px solid #ffffff12;display:flex;justify-content:space-between;gap:10px;font-size:13px;letter-spacing:.1em;font-weight:800}.badge{font-size:10px;color:var(--cyan);border:1px solid #35e7ff55;border-radius:7px;padding:5px 8px}.body{padding:18px}.upload{padding:25px 14px;text-align:center;border:1px dashed #43d9f877;border-radius:15px;background:#06182e88}.icon{font-size:34px;color:var(--cyan);margin-bottom:8px}.upload h2{font-size:18px;margin:5px 0 9px}.muted,.note{font-size:12px;color:var(--muted);line-height:1.6}input[type=file]{display:block;max-width:100%;margin:18px auto 6px;font-size:12px;color:#d7eaff}button{cursor:pointer;font:inherit}.primary{width:100%;padding:16px;margin-top:15px;border:0;border-radius:12px;font-weight:850;letter-spacing:.12em;background:linear-gradient(100deg,#26e9ff,#4988ff);color:#041329}.primary:disabled{opacity:.5}.status{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;margin-top:13px;border-radius:10px;background:#06142b;border:1px solid #ffffff12;color:var(--gold);font-size:12px}.progress{height:4px;background:#142b49;border-radius:8px;margin-top:10px;overflow:hidden}.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),#9b80ff)}.grid{display:grid;grid-template-columns:1fr;gap:10px}@media(min-width:650px){.grid{grid-template-columns:repeat(3,1fr)}}.metric{border:1px solid var(--line);border-radius:15px;padding:16px;background:#0a2341cc}.metric label{font-size:11px;color:var(--cyan);letter-spacing:.1em}.value{font-size:28px;font-weight:800;margin:12px 0 4px}.results{white-space:pre-wrap;overflow-wrap:anywhere;background:#050e1d;border:1px solid #1d385b;border-radius:12px;padding:14px;font:12px/1.65 ui-monospace,monospace;min-height:100px}.secondary{border:1px solid #53dfff66;color:#b8f4ff;background:#0a2447;border-radius:9px;padding:10px 12px;margin:10px 6px 0 0}.note{margin-top:14px}.footer{text-align:center;color:#7894b4;font-size:11px;line-height:1.6;margin-top:25px}
+</style></head><body><main class="wrap">
+<header class="hero"><div class="brand">KellerScan</div><div class="sub">SYSDIAGNOSE ANALYZER</div><div class="badge" style="display:inline-block;margin-top:18px">● SCANNER NO NAVEGADOR · PT-BR</div></header>
+<section class="panel"><div class="head"><span>ENTRADA DE ARQUIVO</span><span class="badge">01 / UPLOAD</span></div><div class="body">
+<div class="upload"><div class="icon">⌁</div><h2>Selecione sua Sysdiagnose</h2><div class="muted">Escolha o arquivo original no app Arquivos.<br>Não precisa extrair antes.</div>
+<label for="file" class="muted" style="display:block;margin-top:16px">TOQUE ABAIXO PARA ESCOLHER O ARQUIVO</label><input id="file" type="file" accept=".tar.gz,.tgz,.tar,.zip,application/gzip,application/zip" onchange="kellerFileChanged(this)" oninput="kellerFileChanged(this)"><div id="filename" class="muted" aria-live="polite">Nenhum arquivo selecionado</div></div>
+<button id="scan" class="primary">INICIAR ANÁLISE →</button><div id="status" class="status">Aguardando arquivo. Compatíveis: .tar.gz, .tgz, .tar e .zip.</div><div class="progress"><span id="bar"></span></div>
+<p class="note">O arquivo é analisado no navegador, não enviado por este código a um servidor. É necessária internet para carregar os leitores ZIP/GZIP. Para arquivos grandes, mantenha esta página aberta. Se você abriu o HTML na pré-visualização do Discord/Arquivos e os botões não funcionam, abra o arquivo em um navegador compatível ou hospede-o em HTTPS.</p>
+</div></section>
+<section class="grid"><div class="metric"><label>01 · ARQUIVOS</label><div id="mFiles" class="value">—</div><div id="mFilesDesc" class="muted">Examinados</div></div><div class="metric"><label>02 · VPN / JAILBREAK</label><div id="mSec" class="value">—</div><div class="muted">Indicadores encontrados</div></div><div class="metric"><label>03 · FREE FIRE</label><div id="mGame" class="value">—</div><div class="muted">Referências em registros legíveis</div></div></section>
+<section class="panel"><div class="head"><span>RELATÓRIO DE ANÁLISE</span><span class="badge">02 / RESULT</span></div><div class="body"><div id="results" class="results">O relatório aparecerá aqui após a análise.</div><button id="save" class="secondary" disabled>Salvar relatório TXT</button><button id="reset" class="secondary">Limpar</button></div></section>
+<section class="panel"><div class="head"><span>LIMITAÇÕES</span><span class="badge">INFO</span></div><div class="body note">Os resultados são indicadores heurísticos, não prova de uso de cheat. Logs normais podem conter nomes de VPN, depuradores ou componentes do sistema. A ausência de achados não comprova que o aparelho está livre de modificações. Sysdiagnose pode não ter dados suficientes para determinar o tempo exato em que o Free Fire ficou aberto. Arquivos individuais acima de 12 MB são ignorados por segurança nesta versão.</div></section>
+<div class="footer">KellerScan · Ferramenta independente · Sem login ou senha</div></main>
+<script>
+const $=id=>document.getElementById(id);let reportText="";let selectedSysdiagnoseFile=null;
+const patterns=[
+["VPN / Rede","Componente de VPN",/\bNEVPNManager\b|\bNEVPNConnection\b|\bNetworkExtension\b/ig,"INFO"],
+["VPN / Rede","Túnel ou provedor VPN",/\bpacket.?tunnel\b|\bTunnelProvider\b|\bPacketTunnelProvider\b|\bVPNConnection\b/ig,"INFO"],
+["VPN / Rede","Nome/protocolo VPN",/\bWireGuard\b|\bOpenVPN\b|\bIKEv2\b|\bIPSec\b/ig,"INFO"],
+["VPN / Rede","Proxy ou DNS",/\bDNSProxy\b|\bDNSSettings\b|\bProxySettings\b|\bHTTPProxy\b/ig,"REVISAR"],
+["Jailbreak / Integridade","Caminho associado a jailbreak",/\/Applications\/Cydia\.app|\/Library\/MobileSubstrate|\/var\/jb\//ig,"ATENÇÃO"],
+["Jailbreak / Integridade","Ferramenta/framework associado",/\bCydia\b|\bSileo\b|\bZebra\b|\bSubstitute\b|\bSubstrate\b|\blibhooker\b/ig,"REVISAR"],
+["Jailbreak / Integridade","Instrumentação/injeção",/\bDYLD_INSERT_LIBRARIES\b|\bfrida-server\b|\bFridaGadget\b|\bSubstrateLoader\b/ig,"ATENÇÃO"],
+["Jailbreak / Integridade","Depuração/instrumentação",/\bdebugserver\b|\bLLDB\b|\bptrace\b|\bfrida\b/ig,"REVISAR"],
+["Free Fire","Referência ao jogo",/com\.dts\.freefireth|com\.garena\.game\.ff|Free Fire|FreeFire/ig,"INFO"],
+["Apps / Processos","Termo que exige revisão",/\bcheat\b|\bmod.?menu\b|\bgame.?guardian\b|\bgameguardian\b/ig,"REVISAR"]
+];
+function loadScript(url){return new Promise((resolve,reject)=>{let s=document.createElement("script");s.src=url;s.onload=resolve;s.onerror=()=>reject(Error("Não consegui carregar a biblioteca de leitura. Confira a internet e abra a página no Safari; a pré-visualização do Discord/Arquivos pode bloquear scripts."));document.head.appendChild(s)})}
+function textAt(b,start,len){let end=start;while(end<start+len&&b[end]!==0)end++;return new TextDecoder().decode(b.subarray(start,end))}
+function findMatches(name,text,out){if(!text)return;let printable=0,lim=Math.min(text.length,2000);for(let i=0;i<lim;i++){const c=text.charCodeAt(i);if(c===9||c===10||c===13||(c>=32&&c<127)||c>159)printable++}if(lim&&printable/lim<.65)return;for(const [cat,label,rx,level] of patterns){rx.lastIndex=0;let count=0,example="";let m;while((m=rx.exec(text))!==null){count++;if(!example)example=text.slice(Math.max(0,m.index-45),Math.min(text.length,m.index+110)).replace(/\s+/g," ");if(count>=100)break}if(count)out.push({cat,label,level,count,file:name,example})}}
+async function tarStream(stream,onFile,onProgress){
+ const reader=stream.getReader();let pending=new Uint8Array(0),count=0,total=0,skipped=0;
+ async function need(n){while(pending.length<n){const r=await reader.read();if(r.done)break;let a=new Uint8Array(pending.length+r.value.length);a.set(pending);a.set(r.value,pending.length);pending=a}if(pending.length<n)return null;const a=pending.slice(0,n);pending=pending.slice(n);return a}
+ async function skip(n){while(n>0){if(pending.length){let k=Math.min(n,pending.length);pending=pending.slice(k);n-=k;continue}const r=await reader.read();if(r.done)return false;if(r.value.length<=n)n-=r.value.length;else{pending=r.value.slice(n);n=0}}return true}
+ try{while(count<50000){const h=await need(512);if(!h)break;if(h.every(x=>x===0))break;let name=textAt(h,0,100),prefix=textAt(h,345,155);if(prefix)name=prefix+"/"+name;const sf=h.subarray(124,136);let size;if(sf[0]&128){if(sf[0]&64)throw Error("Campo de tamanho TAR inválido.");size=sf[0]&63;for(let i=1;i<sf.length;i++)size=size*256+sf[i]}else{let s=textAt(sf,0,12).trim().replace(/[^0-7]/g,"");size=s?parseInt(s,8):0}if(!Number.isFinite(size)||size<0)throw Error("Não consegui ler o tamanho de um item TAR.");let type=String.fromCharCode(h[156]||48),regular=type==="0"||type===" "||type==="\0";if(regular&&size>0&&size<=12*1024*1024){const data=await need(size);if(!data)throw Error("O TAR terminou antes do esperado.");onFile(name,data);count++;total+=size}else{if(regular&&size>12*1024*1024)skipped++;if(!await skip(size))throw Error("O TAR terminou antes do esperado.")}let pad=(512-size%512)%512;if(pad&&!await skip(pad))throw Error("O TAR terminou durante o alinhamento.");if(count%30===0)onProgress(count,total,skipped)}}
+ finally{try{reader.releaseLock()}catch(e){}}
+ return{count,total,skipped}
+}
+function tarBuffer(b,onFile,onProgress){let off=0,count=0,total=0,skipped=0;while(off+512<=b.length&&count<50000){let h=b.subarray(off,off+512);if(h.every(x=>x===0))break;let name=textAt(h,0,100),prefix=textAt(h,345,155);if(prefix)name=prefix+"/"+name;let sf=h.subarray(124,136),size;if(sf[0]&128){if(sf[0]&64)throw Error("Tamanho TAR inválido.");size=sf[0]&63;for(let i=1;i<sf.length;i++)size=size*256+sf[i]}else{let s=textAt(sf,0,12).trim().replace(/[^0-7]/g,"");size=s?parseInt(s,8):0}if(!Number.isFinite(size)||size<0||off+512+size>b.length)throw Error("Estrutura TAR inválida ou incompleta.");let type=String.fromCharCode(h[156]||48);if(["0"," ","\0"].includes(type)&&size>0){if(size<=12*1024*1024){onFile(name,b.slice(off+512,off+512+size));count++;total+=size}else skipped++}off+=512+Math.ceil(size/512)*512;if(count%30===0)onProgress(count,total,skipped)}return{count,total,skipped}}
+async function gzipStream(file){if(!("DecompressionStream"in window))return null;return file.stream().pipeThrough(new DecompressionStream("gzip"))}
+function kellerFileChanged(input){
+ const f=(input && input.files && input.files.length>0) ? input.files[0] : null;
+ selectedSysdiagnoseFile=f;
+ $("filename").textContent=f ? ("ARQUIVO RECEBIDO: "+f.name+" · "+(f.size/1048576).toFixed(2)+" MB") : "Nenhum arquivo selecionado";
+ if(f){
+  $("status").textContent="Arquivo recebido pelo Safari. Toque em INICIAR ANÁLISE.";
+  $("bar").style.width="0%";
+ } else {
+  $("status").textContent="O seletor não entregou um arquivo à página. Tente escolher novamente.";
+ }
+}
+function syncSelectedFile(){
+ const input=$("file");
+ const f=(input && input.files && input.files.length>0) ? input.files[0] : selectedSysdiagnoseFile;
+ if(f){
+  selectedSysdiagnoseFile=f;
+  $("filename").textContent="ARQUIVO RECEBIDO: "+f.name+" · "+(f.size/1048576).toFixed(2)+" MB";
+ }
+}
+$("file").addEventListener("change",function(){kellerFileChanged(this)});
+$("file").addEventListener("input",function(){kellerFileChanged(this)});
+window.addEventListener("pageshow",syncSelectedFile);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncSelectedFile()});
+$("scan").addEventListener("click",async()=>{
+ const input=$("file");
+ const file=(input && input.files && input.files.length>0) ? input.files[0] : selectedSysdiagnoseFile;
+ if(!file){
+  $("filename").textContent="Nenhum arquivo recebido pela página";
+  $("status").textContent="DIAGNÓSTICO: o Safari não disponibilizou o arquivo ao JavaScript. Se o nome aparece apenas ao lado do botão nativo, esta página provavelmente está aberta numa visualização/cópia antiga. Abra o NOVO HTML no Safari e selecione novamente.";
+  return;
+ }
+ selectedSysdiagnoseFile=file;
+ $("filename").textContent="ARQUIVO RECEBIDO: "+file.name+" · "+(file.size/1048576).toFixed(2)+" MB";
+ $("scan").disabled=true;$("save").disabled=true;$("bar").style.width="2%";$("status").textContent="Verificando formato e preparando leitura…";
+ let findings=[],count=0,total=0,skipped=0;
+ const onFile=(name,data)=>findMatches(name,new TextDecoder("utf-8",{fatal:false}).decode(data),findings);
+ const prog=(n,b,s)=>{$("status").textContent=`Lendo arquivo interno ${n}… ${(b/1048576).toFixed(1)} MB de conteúdo legível; ${s} itens grandes ignorados.`;$("bar").style.width="65%"};
+ try{
+  const lower=file.name.toLowerCase(),head=new Uint8Array(await file.slice(0,4).arrayBuffer());
+  const isZip=lower.endsWith(".zip")||(head[0]===80&&head[1]===75),isGzip=lower.endsWith(".gz")||lower.endsWith(".tgz")||(head[0]===31&&head[1]===139);
+  if(isZip){
+   $("status").textContent="Carregando leitor ZIP…";if(!window.JSZip)await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js");
+   const zip=await JSZip.loadAsync(file),names=Object.keys(zip.files);let expanded=0;
+   for(let i=0;i<names.length;i++){let name=names[i],entry=zip.files[name];if(entry.dir)continue;if(count>=50000||expanded>600*1024*1024){skipped++;break}try{let data=await entry.async("uint8array");if(data.length>12*1024*1024){skipped++}else{expanded+=data.length;total+=data.length;count++;onFile(name,data)}}catch(e){skipped++}$("bar").style.width=Math.round((i+1)/names.length*85)+"%";if(i%20===0)$("status").textContent=`Analisando ZIP: ${i+1}/${names.length} entradas…`}
+  }else{
+   let stream;
+   if(isGzip){$("status").textContent="Descompactando GZIP em fluxo…";stream=await gzipStream(file);if(stream){const stat=await tarStream(stream,onFile,prog);count=stat.count;total=stat.total;skipped=stat.skipped}else{$("status").textContent="Este navegador não suporta descompactação em fluxo; tentando método alternativo…";if(!window.pako)await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js");const compressed=new Uint8Array(await file.arrayBuffer()),tar=window.pako.ungzip(compressed);const stat=tarBuffer(tar,onFile,prog);count=stat.count;total=stat.total;skipped=stat.skipped}}
+   else if(lower.endsWith(".tar")){const stat=await tarStream(file.stream(),onFile,prog);count=stat.count;total=stat.total;skipped=stat.skipped}
+   else throw Error("Formato não reconhecido. Use .tar.gz, .tgz, .tar ou .zip.");
+  }
+  const unique=new Map();for(const f of findings){let k=[f.cat,f.label,f.file,f.level].join("|");if(!unique.has(k))unique.set(k,{...f,count:0});unique.get(k).count+=f.count}let items=[...unique.values()].sort((a,b)=>a.cat.localeCompare(b.cat)||a.file.localeCompare(b.file));
+  $("mFiles").textContent=count.toLocaleString("pt-BR");$("mFilesDesc").textContent=`Entradas examinadas · ${(total/1048576).toFixed(1)} MB · ${skipped} ignoradas`;
+  $("mSec").textContent=items.filter(x=>x.cat.includes("VPN")||x.cat.includes("Jailbreak")).length.toLocaleString("pt-BR");$("mGame").textContent=items.filter(x=>x.cat==="Free Fire").length.toLocaleString("pt-BR");
+  reportText=`KELLERSCAN — RELATÓRIO SYSDIAGNOSE\nArquivo: ${file.name}\nTamanho original: ${(file.size/1048576).toFixed(2)} MB\nEntradas legíveis examinadas: ${count}\nDados de conteúdo examinados: ${(total/1048576).toFixed(2)} MB\nItens grandes/ignorados: ${skipped}\nTipos de indicadores encontrados: ${items.length}\n\n`;
+  if(!count)reportText+="ATENÇÃO: nenhum arquivo interno legível foi examinado. Pode ser formato TAR não compatível, arquivo incompleto ou erro de leitura.\n\n";
+  if(!items.length)reportText+="Nenhum indicador reconhecido foi encontrado nos registros legíveis examinados. Isso NÃO comprova ausência de VPN, jailbreak ou cheat.\n\n";
+  for(const x of items)reportText+=`[${x.level}] ${x.cat} — ${x.label}\nArquivo interno: ${x.file}\nOcorrências aproximadas: ${x.count}\nTrecho: ${x.example}\n\n`;
+  reportText+="LIMITAÇÕES: busca heurística, falsos positivos possíveis. Não comprova trapaça nem ausência dela. Sysdiagnose pode não registrar o tempo exato em que o jogo ficou aberto.\n";
+  $("results").textContent=reportText;$("save").disabled=false;$("bar").style.width="100%";$("status").textContent=`ANÁLISE CONCLUÍDA — ${count} entradas examinadas; ${items.length} tipos de indicadores.`;
+ }catch(e){$("status").textContent="ERRO NA ANÁLISE: "+(e?.message||String(e));$("results").textContent="A análise falhou antes de terminar. Copie a mensagem acima. Causas comuns: a página foi aberta numa pré-visualização que bloqueia JavaScript; a internet não permitiu carregar a biblioteca; o arquivo está incompleto; ou o formato interno não é TAR/ZIP padrão. Tente abrir a página hospedada em HTTPS no Safari.";$("bar").style.width="0%"}
+ finally{$("scan").disabled=false}
+});
+$("save").addEventListener("click",()=>{let a=document.createElement("a"),u=URL.createObjectURL(new Blob([reportText],{type:"text/plain;charset=utf-8"}));a.href=u;a.download="relatorio-kellerscan.txt";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)});
+$("reset").addEventListener("click",()=>{selectedSysdiagnoseFile=null;$("file").value="";$("filename").textContent="Nenhum arquivo selecionado";$("status").textContent="Aguardando arquivo. Compatíveis: .tar.gz, .tgz, .tar e .zip.";$("results").textContent="O relatório aparecerá aqui após a análise.";$("bar").style.width="0%";$("mFiles").textContent=$("mSec").textContent=$("mGame").textContent="—";$("mFilesDesc").textContent="Examinados";$("save").disabled=true;reportText=""});
+</script></body></html>
